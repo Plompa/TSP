@@ -84,7 +84,7 @@ TSP_reader::TSP_reader(const std::string& filename) {
     } else {
         await(file, line, "NODE_COORD_SECTION");
 
-        std::vector<std::array<double, 2>> coords = getCoords(file, line);
+        std::vector<std::vector<double>> coords = getCoords(file, line);
 
         Graph graph(coords, edgeWeightType); //für koordinaten besitzt der graph einen eigenen konstruktor
         distmatrix = graph.getDistmatrix();
@@ -93,8 +93,8 @@ TSP_reader::TSP_reader(const std::string& filename) {
     file.close();
 }
 
-std::vector<std::array<double, 2>> TSP_reader::getCoords(std::ifstream &file, std::string &line) {
-    std::vector<std::array<double, 2>> coords;
+std::vector<std::vector<double>> TSP_reader::getCoords(std::ifstream &file, std::string &line) {
+    std::vector<std::vector<double>> coords;
     while (getline(file, line)) {
         if(line == "EOF") {
             return coords;
@@ -102,7 +102,7 @@ std::vector<std::array<double, 2>> TSP_reader::getCoords(std::ifstream &file, st
         line = line.substr(line.find_first_not_of(' '), line.size());
         line = line.substr(line.find_first_of(' '), line.size());
         line = line.substr(line.find_first_not_of(' '), line.size());
-        std::array<double, 2> coord{};
+        std::vector<double> coord(2);
         coord[0] = std::stoi(line.substr(0, line.find_first_of(' ')));
         coord[1] = std::stoi(line.substr(line.find_first_of(' '), line.size()));
 

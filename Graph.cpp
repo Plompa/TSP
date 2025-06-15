@@ -16,13 +16,13 @@ Graph::Graph(int numNodes) : numNodes(numNodes) {
 Graph::Graph(int numNodes, std::vector<std::vector<int>> distmatrix) : numNodes(numNodes), distmatrix(distmatrix) {
 }
 
-Graph::Graph(std::vector<std::array<double, 2>> coords, std::string norm) {
+Graph::Graph(std::vector<std::vector<double>> coords, std::string norm) {
     numNodes = coords.size();
     distmatrix = std::vector<std::vector<int>>(numNodes, std::vector<int>(numNodes));
     for (auto & coord : coords) {
         int x = static_cast<int>(coord[0]);
         int y = static_cast<int>(coord[1]);
-        int_coords.push_back(std::array<int, 2>{x, y});
+        int_coords.push_back(std::vector<int>{x, y});
     }
 
     calcDistmatrix(coords, norm);
@@ -34,10 +34,10 @@ void Graph::random2d(std::string norm, int max) {
     std::mt19937 gen(1); // seed the generator
     std::uniform_int_distribution<> distr(0, max); // define the range
 
-    std::vector<std::array<double, 2>> coords;
+    std::vector<std::vector<double>> coords;
 
     for(int i = 0; i < Graph::numNodes; i++) {
-        std::array<double, 2> coord{};
+        std::vector<double> coord(2);
         coord[0] = distr(gen);
         coord[1] = distr(gen);
         coords.push_back(coord);
@@ -45,13 +45,13 @@ void Graph::random2d(std::string norm, int max) {
     for (auto & coord : coords) {
         int x = static_cast<int>(coord[0]);
         int y = static_cast<int>(coord[1]);
-        int_coords.push_back(std::array<int, 2>{x, y});
+        int_coords.push_back(std::vector<int>{x, y});
     }
 
     calcDistmatrix(coords, norm);
 }
 
-void Graph::calcDistmatrix(std::vector<std::array<double, 2>> coords, std::string norm) {
+void Graph::calcDistmatrix(std::vector<std::vector<double>> coords, std::string norm) {
     //so wie ich das verstanden habe sollen wir immer ganzzahlen verwenden, daher runde ich einfach
     if(norm == "EUC_2D") {
         for (int x = 0; x < numNodes; x++) {
@@ -90,6 +90,6 @@ std::string Graph::getName() const {
     return name;
 }
 
-std::vector<std::array<int, 2>> Graph::get_int_coords() {
+std::vector<std::vector<int>> Graph::get_int_coords() {
     return int_coords;
 }

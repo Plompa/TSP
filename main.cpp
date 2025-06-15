@@ -12,7 +12,7 @@ int main(int argc, char * argv[]) {
     std::string groetschel = "C:\\Users\\lucmi\\Downloads\\TSPLIB_ alle symmetrischen TSP Instanzen\\gr120.tsp\\gr120.tsp";
     std::string other = "C:\\Users\\lucmi\\Downloads\\TSPLIB_ alle symmetrischen TSP Instanzen\\eil76.tsp\\eil76.tsp";
 
-    if(argc < 1) {
+    if(argc < 2) {
         std::cout << "please enter arguments" << std::endl;
         return 1;
     }

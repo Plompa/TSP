@@ -29,7 +29,7 @@ private:
 
     bool is_number(const std::string &s);
 
-    std::vector<std::array<double, 2>> getCoords(std::ifstream &file, std::string &line);
+    std::vector<std::vector<double>> getCoords(std::ifstream &file, std::string &line);
 };
 
 
