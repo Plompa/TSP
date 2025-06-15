@@ -1,0 +1,16 @@
+Hallo!
+Diese Abgabe enthält die Einstiegsaufgabe und eine fast fertige Hauptaufgabe
+Das Programm erwartet immer Parameter, die beiden ersten Optionen sind:
+    -path <path> //pfad zu einer .tsp datei
+    -rand <int> //erzeugt einen Graphen mit n Knoten durch Generieren von 2d Koordinaten mit euklidischer Distanz
+Danach kann man mit -out <path> einen Zielort für die Tour-Datei angeben. Zu beachten ist, dass immer
+"_einf.tour.opt" bzw "_haupt.tour.opt" appendet wird.
+Ohne -out wird der Name in der tour Datei übernommen oder "unnamed", falls kein name gefunden wurde.
+
+Bsp: -rand 42 -out hallo
+
+Es werden immer die Einstiegs- als auch die Hauptaufgabe auf den Graphen angewendet
+
+!Die Hauptaufgabe ist noch nicht fertig!
+Valgrind wurde noch nicht angewendet da ich aktuell nicht mit Linux arbeite und würde vermutlich meinen Code zerreißen
+Kommentare für die Hauptaufgabe kommen noch
