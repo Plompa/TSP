@@ -12,7 +12,7 @@
 TSP_writer::TSP_writer() {
 }
 
-void TSP_writer::save(const std::vector<int> &tour, int tour_len, std::string name) {
+void TSP_writer::save(const std::vector<int> &tour, const int tour_len, const std::string& name, const std::vector<int>& node_ids) {
     //hier passiert nichts spanndendes
     std::ofstream file(name + ".opt.tour");
 
@@ -22,8 +22,8 @@ void TSP_writer::save(const std::vector<int> &tour, int tour_len, std::string na
     file << "DIMENSION: " << tour.size() << std::endl;
     file << "TOUR SECTION" << std::endl;
 
-    for (int i = 0; i < tour.size(); i++) {
-        file << tour[i] << " ";
+    for (int i : tour) {
+        file << node_ids[i] << " ";
     }
     file << std::endl;
 
@@ -31,7 +31,8 @@ void TSP_writer::save(const std::vector<int> &tour, int tour_len, std::string na
     file.close();
 }
 
-void TSP_writer::save(const std::vector<int>& tour, int tour_len, const std::map<std::string, std::vector<int>> &display_data, std::string name) {
+//speichert mit extra daten zum eventuellen zukünftigen visualisieren
+void TSP_writer::save(const std::vector<int>& tour, const int tour_len, const std::string& name, const std::vector<int>& node_ids, const std::map<std::string, std::vector<int>> &display_data) {
     //hier passiert nichts spanndendes
     std::ofstream file(name + ".opt.tour");
 
@@ -41,8 +42,8 @@ void TSP_writer::save(const std::vector<int>& tour, int tour_len, const std::map
     file << "DIMENSION: " << tour.size() << std::endl;
     file << "TOUR SECTION" << std::endl;
 
-    for (int i = 0; i < tour.size(); i++) {
-        file << tour[i] << " ";
+    for (int i : tour) {
+        file << node_ids[i] << " ";
     }
     file << std::endl;
 

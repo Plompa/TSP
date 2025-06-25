@@ -10,7 +10,3 @@ Ohne -out wird der Name in der tour Datei übernommen oder "unnamed", falls kein
 Bsp: -rand 42 -out hallo
 
 Es werden immer die Einstiegs- als auch die Hauptaufgabe auf den Graphen angewendet
-
-!Die Hauptaufgabe ist noch nicht fertig!
-Valgrind wurde noch nicht angewendet da ich aktuell nicht mit Linux arbeite und würde vermutlich meinen Code zerreißen
-Kommentare für die Hauptaufgabe kommen noch

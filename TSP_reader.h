@@ -11,8 +11,9 @@ class TSP_reader {
 public:
     explicit TSP_reader(const std::string& filename);
     std::vector<std::vector<int>> getDistmatrix();
-    int getNumNodes() const;
-    std::string getName();
+    [[nodiscard]] int getNumNodes() const;
+    std::string getName() const;
+    std::vector<int> getNode_ids() const;
 
 private:
     int numNodes;
@@ -21,6 +22,7 @@ private:
     std::vector<std::vector<int>> distmatrix;
     std::string edgeWeightType;
     std::string edgeWeightFormat;
+    std::vector<int> node_ids;
 
     void await(std::ifstream &file, std::string &line, const std::string& cmp);
     std::string getArgument(std::string &str);
@@ -29,7 +31,7 @@ private:
 
     bool is_number(const std::string &s);
 
-    std::vector<std::vector<double>> getCoords(std::ifstream &file, std::string &line);
+    std::vector<std::vector<double>> getCoords_with_ids(std::ifstream &file, std::string &line);
 };
 
 

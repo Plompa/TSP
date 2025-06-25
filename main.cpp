@@ -28,7 +28,7 @@ int main(int argc, char * argv[]) {
         }
         std::string arg2(argv[2]);
         TSP_reader tsp_read(arg2);
-        graph = Graph(tsp_read.getNumNodes(), tsp_read.getDistmatrix());
+        graph = Graph(tsp_read.getNumNodes(), tsp_read.getDistmatrix(), tsp_read.getNode_ids());
         graph.setName(tsp_read.getName());
     }
     else if(arg1 ==  "-rand") {

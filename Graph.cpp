@@ -8,15 +8,24 @@
 #include <string>
 #include <cmath>
 #include <random>
+#include <utility>
 
-Graph::Graph(int numNodes) : numNodes(numNodes) {
+Graph::Graph(const int numNodes) : numNodes(numNodes) {
     distmatrix = std::vector< std::vector<int> >(numNodes, std::vector<int>(numNodes));
+    node_ids = std::vector<int>(numNodes);
+    for (int i = 0; i < numNodes; i++) {
+        node_ids[i] = i;
+    }
 }
 
-Graph::Graph(int numNodes, std::vector<std::vector<int>> distmatrix) : numNodes(numNodes), distmatrix(distmatrix) {
+Graph::Graph(const int numNodes, std::vector<std::vector<int>> distmatrix, const std::vector<int> &node_ids) :
+    numNodes(numNodes),
+    distmatrix(std::move(distmatrix)) {
+    this -> node_ids = node_ids;
 }
 
-Graph::Graph(std::vector<std::vector<double>> coords, std::string norm) {
+Graph::Graph(std::vector<std::vector<double>> coords, const std::string& norm, const std::vector<int> &node_ids) {
+    this -> node_ids = node_ids;
     numNodes = coords.size();
     distmatrix = std::vector<std::vector<int>>(numNodes, std::vector<int>(numNodes));
     for (auto & coord : coords) {
@@ -28,10 +37,10 @@ Graph::Graph(std::vector<std::vector<double>> coords, std::string norm) {
     calcDistmatrix(coords, norm);
 }
 
-void Graph::random2d(std::string norm, int max) {
+void Graph::random2d(const std::string& norm, int max) {
     //std::random_device rd; // obtain a random number from hardware
     //std::mt19937 gen(rd()); // seed the generator
-    std::mt19937 gen(1); // seed the generator
+    std::mt19937 gen(1); // seed the generator //1
     std::uniform_int_distribution<> distr(0, max); // define the range
 
     std::vector<std::vector<double>> coords;
@@ -51,7 +60,7 @@ void Graph::random2d(std::string norm, int max) {
     calcDistmatrix(coords, norm);
 }
 
-void Graph::calcDistmatrix(std::vector<std::vector<double>> coords, std::string norm) {
+void Graph::calcDistmatrix(const std::vector<std::vector<double>>& coords, const std::string& norm) {
     //so wie ich das verstanden habe sollen wir immer ganzzahlen verwenden, daher runde ich einfach
     if(norm == "EUC_2D") {
         for (int x = 0; x < numNodes; x++) {
@@ -74,7 +83,7 @@ void Graph::calcDistmatrix(std::vector<std::vector<double>> coords, std::string 
     }
 }
 
-std::vector<std::vector<int> > Graph::getDistmatrix() {
+std::vector<std::vector<int>> Graph::getDistmatrix() {
     return distmatrix;
 }
 
@@ -82,7 +91,7 @@ int Graph::getNumNodes() const {
     return numNodes;
 }
 
-void Graph::setName(std::string name) {
+void Graph::setName(const std::string &name) {
     this -> name = name;
 }
 
@@ -90,6 +99,11 @@ std::string Graph::getName() const {
     return name;
 }
 
-std::vector<std::vector<int>> Graph::get_int_coords() {
+std::vector<std::vector<int>> Graph::get_int_coords() const {
     return int_coords;
 }
+
+std::vector<int> Graph::get_node_ids() const {
+    return node_ids;
+}
+

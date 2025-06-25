@@ -16,10 +16,19 @@ Einstiegsaufgabe::Einstiegsaufgabe(Graph graph) {
             edges.push_back(Edge(i, j, graph.getDistmatrix()[i][j]));
         } //der graph ist im wesentlichen eine adjazenzmatrix, um die kanten zu sortieren werden ersteinmal hilfsobjekte erstellt
     }
-    std::sort(edges.begin(), edges.end(), //sortiert die kanten nach gewicht
-        [](const Edge &e1, const Edge &e2) {return e1.weight < e2.weight;});
 
     int tour_len = 0;
+
+    //kanonische tour 0,1,2...
+    for (int i = 0; i < graph.getNumNodes(); ++i) {
+        tour_len += graph.getDistmatrix()[i][(i + 1) % graph.getNumNodes()];
+    }
+    std::cout << "laenge der kanonischen tour: " << tour_len << std::endl;
+
+    tour_len = 0;
+
+    std::sort(edges.begin(), edges.end(), //sortiert die kanten nach gewicht
+        [](const Edge &e1, const Edge &e2) {return e1.weight < e2.weight;});
 
     //in einer tour wird jeder knoten genau einmal als head und einmal als tail verwendet, mit diesen listen wird auf dieses limit geachtet
     std::vector<bool> used_as_head(graph.getNumNodes(), false);
@@ -68,7 +77,6 @@ Einstiegsaufgabe::Einstiegsaufgabe(Graph graph) {
      */
     int from = 0;
     for (int i = 0; i < graph.getNumNodes(); ++i) {
-        std::cout << from << " ";
         tour.push_back(from);
         for (auto edge: tour_edges) {
             if(edge.tail == from) {
@@ -77,9 +85,23 @@ Einstiegsaufgabe::Einstiegsaufgabe(Graph graph) {
             }
         }
     }
+    for (auto node: tour) {
+        std::cout << graph.get_node_ids()[node] << " ";
+    }
     std::cout << std::endl;
 
+    //überprüfe ob die tour legitim ist, also ob jeder knoten genau einmal enthalten ist
+    std::vector<bool> used(graph.getNumNodes(), false);
+    for (int i = 0; i < graph.getNumNodes(); ++i) {
+        used[tour[i]] = true;
+    }
+    for (int i = 0; i < graph.getNumNodes(); ++i) {
+        if(!used[i]) {
+            std::cout << "Error: node " << i << " not used!" << std::endl;
+        }
+    }
+
     TSP_writer writer;
-    writer.save(tour, tour_len, graph.getName() + "_einst");
+    writer.save(tour, tour_len, graph.getName() + "_einst", graph.get_node_ids());
 }
 

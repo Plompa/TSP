@@ -65,7 +65,7 @@ TSP_reader::TSP_reader(const std::string& filename) {
         } else if (edgeWeightFormat == "UPPER_DIAG_ROW") {
             int counter = 0;
             for (int x = 0; x < numNodes; x++) {
-                for (int y = 0; y <= x; y++) {
+                for (int y = x; y <= numNodes; y++) {
                     distmatrix[x][y] = edgeWeights[counter];
                     distmatrix[y][x] = edgeWeights[counter];
                     counter++;
@@ -74,7 +74,7 @@ TSP_reader::TSP_reader(const std::string& filename) {
         } else if (edgeWeightFormat == "UPPER_ROW") {
             int counter = 0;
             for (int x = 0; x < numNodes; x++) {
-                for (int y = 0; y < x; y++) {
+                for (int y = x; y < numNodes; y++) {
                     distmatrix[x][y] = edgeWeights[counter];
                     distmatrix[y][x] = edgeWeights[counter];
                     counter++;
@@ -84,27 +84,39 @@ TSP_reader::TSP_reader(const std::string& filename) {
     } else {
         await(file, line, "NODE_COORD_SECTION");
 
-        std::vector<std::vector<double>> coords = getCoords(file, line);
+        std::vector<std::vector<double>> coords_with_ids = getCoords_with_ids(file, line);
+        std::vector<std::vector<double>> coords(numNodes);
+        std::vector<int> node_ids(numNodes);
+        for (int i = 0; i < numNodes; ++i) {
+            coords[i] = std::vector<double>{coords_with_ids[i][1], coords_with_ids[i][2]};
+            node_ids[i] = static_cast<int>(coords_with_ids[i][0]);
+        }
 
-        Graph graph(coords, edgeWeightType); //für koordinaten besitzt der graph einen eigenen konstruktor
+        Graph graph(coords, edgeWeightType, node_ids); //für koordinaten besitzt der graph einen eigenen konstruktor
         distmatrix = graph.getDistmatrix();
+        this -> node_ids = node_ids;
     }
 
     file.close();
 }
 
-std::vector<std::vector<double>> TSP_reader::getCoords(std::ifstream &file, std::string &line) {
+std::vector<std::vector<double>> TSP_reader::getCoords_with_ids(std::ifstream &file, std::string &line) {
     std::vector<std::vector<double>> coords;
     while (getline(file, line)) {
         if(line == "EOF") {
             return coords;
         }
-        line = line.substr(line.find_first_not_of(' '), line.size());
-        line = line.substr(line.find_first_of(' '), line.size());
-        line = line.substr(line.find_first_not_of(' '), line.size());
-        std::vector<double> coord(2);
+        std::vector<double> coord(3);
+        line = line.substr(line.find_first_not_of(' '), line.size()); //entfernt leerzeichen am anfang
         coord[0] = std::stoi(line.substr(0, line.find_first_of(' ')));
-        coord[1] = std::stoi(line.substr(line.find_first_of(' '), line.size()));
+
+        line = line.substr(line.find_first_of(' '), line.size()); //entfernt das 1. argument
+        line = line.substr(line.find_first_not_of(' '), line.size()); //entfernt leerzeichen
+        coord[1] = std::stoi(line.substr(0, line.find_first_of(' ')));
+
+        line = line.substr(line.find_first_of(' '), line.size()); //entfernt das 2. argument
+        line = line.substr(line.find_first_not_of(' '), line.size()); //entfernt leerzeichen
+        coord[2] = std::stoi(line.substr(0, line.find_first_of(' ')));
 
         coords.push_back(coord);
     }
@@ -178,7 +190,12 @@ int TSP_reader::getNumNodes() const {
     return numNodes;
 }
 
-std::string TSP_reader::getName() {
+std::string TSP_reader::getName() const{
     return name;
 }
+
+std::vector<int> TSP_reader::getNode_ids() const {
+    return node_ids;
+}
+
 

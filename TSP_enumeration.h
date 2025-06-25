@@ -4,6 +4,7 @@
 
 #ifndef TSP_ENUMERATION_H
 #define TSP_ENUMERATION_H
+#include <bitset>
 #include <map>
 #include <string>
 #include <unordered_map>
@@ -22,6 +23,7 @@ private:
     int bestlen = 1000000000;
     int ncount;
     std::unordered_map<std::vector<bool>, int> mst_map;
+    std::unordered_map<std::bitset<300>, int> mst_map_2;
     std::unordered_map<std::vector<bool>, int> shortest_path_map;
     int map_uses = 0;
     int shortest_path_map_uses = 0;
@@ -54,27 +56,21 @@ private:
 
     bool dynamic_shortest_path(int s, int t, int tourlen);
 
-    int shortest_path(int k);
+    void path_precompute(int s, int t, int pathlen);
 
-    int path_permute(int k, int t, int pathlen, int best_pathlen);
-
-    int hk_bound();
+    std::vector<int> hk_bound();
 
     int one_tree_bound();
 
-    std::vector<int> max_one_tree();
-
     void held_karp_tuning();
-
-    void held_karp_tuning_2();
 
     int w_delta(const std::vector<int>& one_tree) const;
 
-    int w_delta_2(const std::vector<int> &deg) const;
+    int w_delta_unmodified(const std::vector<int> &deg) const;
 
     double step(int m, int M, double step1);
 
-    std::vector<int> held_karp_one_tree(int start);
+    std::vector<int> one_tree(int start);
 
     std::vector<int> held_karp_mst(int count) const;
 

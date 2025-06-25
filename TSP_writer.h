@@ -12,8 +12,9 @@
 class TSP_writer {
 public:
     TSP_writer();
-    void save(const std::vector<int>& tour, int tour_len, std::string name);
-    void save(const std::vector<int>& tour, int tour_len, const std::map<std::string, std::vector<int>>& display_data, std::string name);
+    void save(const std::vector<int> &tour, int tour_len, const std::string &name, const std::vector<int> &node_ids);
+    void save(const std::vector<int> &tour, int tour_len, const std::string &name, const std::vector<int> &node_ids, const std::map<
+              std::string, std::vector<int>> &display_data);
 };
 
 

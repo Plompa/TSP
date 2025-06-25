@@ -6,7 +6,7 @@ set(CMAKE_CXX_FLAGS -Wall)
 set(CMAKE_CXX_FLAGS -Wextra)
 set(CMAKE_CXX_FLAGS -Wpedantic)
 set(CMAKE_CXX_FLAGS -Werror)
-
+set(CMAKE_CXX_FLAGS -O3)
 
 add_executable(TSP main.cpp
         TSP_reader.cpp

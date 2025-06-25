@@ -51,37 +51,37 @@ build cmake_object_order_depends_target_TSP: phony || .
 
 build CMakeFiles/TSP.dir/main.cpp.obj: CXX_COMPILER__TSP_unscanned_Debug C$:/Users/lucmi/CLionProjects/TSP/main.cpp || cmake_object_order_depends_target_TSP
   DEP_FILE = CMakeFiles\TSP.dir\main.cpp.obj.d
-  FLAGS = -Werror -g -std=gnu++20 -fdiagnostics-color=always
+  FLAGS = -O3 -g -std=gnu++20 -fdiagnostics-color=always
   OBJECT_DIR = CMakeFiles\TSP.dir
   OBJECT_FILE_DIR = CMakeFiles\TSP.dir
 
 build CMakeFiles/TSP.dir/TSP_reader.cpp.obj: CXX_COMPILER__TSP_unscanned_Debug C$:/Users/lucmi/CLionProjects/TSP/TSP_reader.cpp || cmake_object_order_depends_target_TSP
   DEP_FILE = CMakeFiles\TSP.dir\TSP_reader.cpp.obj.d
-  FLAGS = -Werror -g -std=gnu++20 -fdiagnostics-color=always
+  FLAGS = -O3 -g -std=gnu++20 -fdiagnostics-color=always
   OBJECT_DIR = CMakeFiles\TSP.dir
   OBJECT_FILE_DIR = CMakeFiles\TSP.dir
 
 build CMakeFiles/TSP.dir/TSP_enumeration.cpp.obj: CXX_COMPILER__TSP_unscanned_Debug C$:/Users/lucmi/CLionProjects/TSP/TSP_enumeration.cpp || cmake_object_order_depends_target_TSP
   DEP_FILE = CMakeFiles\TSP.dir\TSP_enumeration.cpp.obj.d
-  FLAGS = -Werror -g -std=gnu++20 -fdiagnostics-color=always
+  FLAGS = -O3 -g -std=gnu++20 -fdiagnostics-color=always
   OBJECT_DIR = CMakeFiles\TSP.dir
   OBJECT_FILE_DIR = CMakeFiles\TSP.dir
 
 build CMakeFiles/TSP.dir/Graph.cpp.obj: CXX_COMPILER__TSP_unscanned_Debug C$:/Users/lucmi/CLionProjects/TSP/Graph.cpp || cmake_object_order_depends_target_TSP
   DEP_FILE = CMakeFiles\TSP.dir\Graph.cpp.obj.d
-  FLAGS = -Werror -g -std=gnu++20 -fdiagnostics-color=always
+  FLAGS = -O3 -g -std=gnu++20 -fdiagnostics-color=always
   OBJECT_DIR = CMakeFiles\TSP.dir
   OBJECT_FILE_DIR = CMakeFiles\TSP.dir
 
 build CMakeFiles/TSP.dir/TSP_writer.cpp.obj: CXX_COMPILER__TSP_unscanned_Debug C$:/Users/lucmi/CLionProjects/TSP/TSP_writer.cpp || cmake_object_order_depends_target_TSP
   DEP_FILE = CMakeFiles\TSP.dir\TSP_writer.cpp.obj.d
-  FLAGS = -Werror -g -std=gnu++20 -fdiagnostics-color=always
+  FLAGS = -O3 -g -std=gnu++20 -fdiagnostics-color=always
   OBJECT_DIR = CMakeFiles\TSP.dir
   OBJECT_FILE_DIR = CMakeFiles\TSP.dir
 
 build CMakeFiles/TSP.dir/Einstiegsaufgabe.cpp.obj: CXX_COMPILER__TSP_unscanned_Debug C$:/Users/lucmi/CLionProjects/TSP/Einstiegsaufgabe.cpp || cmake_object_order_depends_target_TSP
   DEP_FILE = CMakeFiles\TSP.dir\Einstiegsaufgabe.cpp.obj.d
-  FLAGS = -Werror -g -std=gnu++20 -fdiagnostics-color=always
+  FLAGS = -O3 -g -std=gnu++20 -fdiagnostics-color=always
   OBJECT_DIR = CMakeFiles\TSP.dir
   OBJECT_FILE_DIR = CMakeFiles\TSP.dir
 
@@ -94,7 +94,7 @@ build CMakeFiles/TSP.dir/Einstiegsaufgabe.cpp.obj: CXX_COMPILER__TSP_unscanned_D
 # Link the executable TSP.exe
 
 build TSP.exe: CXX_EXECUTABLE_LINKER__TSP_Debug CMakeFiles/TSP.dir/main.cpp.obj CMakeFiles/TSP.dir/TSP_reader.cpp.obj CMakeFiles/TSP.dir/TSP_enumeration.cpp.obj CMakeFiles/TSP.dir/Graph.cpp.obj CMakeFiles/TSP.dir/TSP_writer.cpp.obj CMakeFiles/TSP.dir/Einstiegsaufgabe.cpp.obj
-  FLAGS = -Werror -g
+  FLAGS = -O3 -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\TSP.dir
   POST_BUILD = cd .
