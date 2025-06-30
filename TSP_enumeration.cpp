@@ -377,7 +377,7 @@ std::vector<int> TSP_enumeration::held_karp_mst(int count) const
     int i = 0, m = 0, mini = 0, newcity = 0, mindist = 0, thisdist = 0, len = 0, orig_len = 0;
     int pcity[ncount], pdist[ncount];
     int nearestCity[ncount];
-    std::vector<int> incidentCityCount(ncount);
+    std::vector<int> incidentCityCount(ncount + 2); //an dieser stelle hatte ich einen memory leak und ich verstehe nicht warum, hatte vorher size n und am ende zwei mal psuh back, jetzt habe ich size n + 2 ohne push back und es funktioniert???
     if (count <= 1) return incidentCityCount;
     for (i = 0; i < count; i++) {
         pcity[i] = tour[i];
@@ -409,8 +409,8 @@ std::vector<int> TSP_enumeration::held_karp_mst(int count) const
         nearestCity[mini] = nearestCity[m-1];
     }
 
-    incidentCityCount.push_back(len);
-    incidentCityCount.push_back(orig_len);
+    incidentCityCount[ncount] = (len);
+    incidentCityCount[ncount + 1] = (orig_len);
     return incidentCityCount;
 }
 
