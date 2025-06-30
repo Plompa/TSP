@@ -11,10 +11,8 @@
 #include <ostream>
 #include <queue>
 #include <unordered_map>
-#include <bits/ranges_algo.h>
 
 #include "Graph.h"
-#include "TSP_reader.h"
 #include "TSP_writer.h"
 
 TSP_enumeration::TSP_enumeration(Graph graph) {
@@ -25,15 +23,14 @@ TSP_enumeration::TSP_enumeration(Graph graph) {
     mst_map = std::unordered_map<std::vector<bool>, int>();
     mst_map_2 = std::unordered_map<std::bitset<300>, int>();
     shortest_path_map = std::unordered_map<std::vector<bool>, int>();
-    delta = std::vector<int>(ncount);
+    pi = std::vector<int>(ncount);
 
     std::chrono::steady_clock::time_point total_begin = std::chrono::steady_clock::now();
 
     //k_neigbour_init(10);
 
     if(!is_sym()) {
-        std::cout << "nicht symmetrisch, two opt klappt nicht mehr(?)" << std::endl;
-        return;
+        throw std::runtime_error("nicht symmetrisch, der Algo setzt symmetrie vorraus");
     }
 
     for (int i = 0; i < ncount; i++) tour[i] = i; //initialisieren für permutation über alle touren
@@ -42,13 +39,12 @@ TSP_enumeration::TSP_enumeration(Graph graph) {
     display_data["two_opt_tour"] = std::vector<int>(besttour);
 
     held_karp_tuning();
-    display_data["held_karp_delta"] = delta;
+    display_data["held_karp_pi"] = pi;
 
     bestlen = one_tree_bound();
 
     std::chrono::steady_clock::time_point staged_search_begin = std::chrono::steady_clock::now();
-    /*staged search, wenn der guess zu niedrig war um eine tour zu finden erhöhe solange bis eine gefunden wird
-     */
+    //staged search, wenn der guess zu niedrig war um eine tour zu finden erhöhe solange bis eine gefunden wird
     while (!tourFound) {
         for (int i = 0; i < ncount; i++) tour[i] = i;
         permute(ncount-1,0, tour[ncount - 1] == 0);
@@ -71,7 +67,6 @@ TSP_enumeration::TSP_enumeration(Graph graph) {
     display_data["coords_x"] = coords_x;
     display_data["coords_y"] = coords_y;
 
-    //printf ("Modified Optimal Tour Length = %d\n", bestlen);
     printf ("Optimal Tour Length = %d\n", best_tour_length());
     printf ("Optimal Tour: ");
     for (int i = 0; i < ncount; i++) printf ("%d ", graph.get_node_ids()[besttour[i]]);
@@ -124,7 +119,7 @@ void TSP_enumeration::permute(int k, int tourlen, bool has_zero) {
 }
 
 int TSP_enumeration::mst(int count) /* Adopted from Bentley, Unix Review 1996 */
-//gibt die länge des msts der ersten count nodes zurück
+//gibt die länge des msts der ersten count nodes zurück, übernommen aus dem kapitel
 {
     std::vector<bool> key(ncount);
     for (int i = 0; i < count; i++) {
@@ -143,7 +138,7 @@ int TSP_enumeration::mst(int count) /* Adopted from Bentley, Unix Review 1996 */
         pcity[i] = tour[i];
         pdist[i] = MAXCOST;
     }
-    if (count != ncount) pcity[count++] = tour[ncount-1];
+    if (count != ncount) pcity[count++] = tour[ncount-1]; //das count++ ist suspekt. ohne ist der algo jedoch sehr langsam
     newcity = pcity[count-1];
     for (m = count-1; m > 0; m--) {
         mindist = MAXCOST;
@@ -200,14 +195,18 @@ bool TSP_enumeration::dynamic_shortest_path(int s, int t, int tourlen) {
     }
 }
 
-//berechnet die hk bound nach valenzuela und jones
-//analog zu one_tree_bound mit unmodifizierten gewichten
-std::vector<int> TSP_enumeration::hk_bound() {
+/* berechnet die hk bound nach valenzuela und jones
+ * analog zu one_tree_bound mit unmodifizierten gewichten
+ * gibt auch die knotengrade des maximalen 1 trees zurück
+ * tatsächlich gibt die funktion nur die hk bound für ein festes pi und nicht die "echte"
+ * bound welche nur approximiert werden kann
+ */
+std::vector<int> TSP_enumeration::hk_bound(){
     std::vector<int> best_deg {};
     int best = -MAXCOST;
     for (int start = 0; start < ncount; ++start) {
-        std::vector<int> deg = one_tree(start);
-        int len = w_delta_unmodified(deg);
+        std::vector<int> deg = one_tree(start); //berechnet die länge jedes 1 trees
+        int len = w_pi_unmodified(deg);
         if(best < len) {
             best = len;
             best_deg = deg;
@@ -225,6 +224,8 @@ int TSP_enumeration::one_tree_bound() {
     for (int start = 0; start < ncount; ++start) {
         std::vector<int> deg = one_tree(start);
         int len = deg[ncount]; //die methode held_karp_one_tree gibt die länge des 1 trees im letzen eintrag des vektors
+        //da jeder 1 tree eine untere Schranke für die Länge der optimalen Tour ist,
+        //wird der maximale one tree gesucht, um möglichst nah an den optimalen wert zu kommen
         best = std::max(len, best);
     }
     return best;
@@ -237,85 +238,87 @@ int TSP_enumeration::one_tree_bound() {
  * die modifizierten gewichte, wie im kapitel beschrieben
  */
 void TSP_enumeration::held_karp_tuning() {
-    std::vector<int> best_hk_one_tree {};
     int best_hk_bound = -MAXCOST;
 
-    std::vector<int> delta_sum(ncount);
+    std::vector<int> pi_sum(ncount);
     for (int start = 0; start < ncount; ++start) {
         for (int k = 0; k < ncount; ++k) {
-            delta[k] = 0;
+            pi[k] = 0;
         }
 
-        std::vector<int> deg = one_tree(start);
+        std::vector<int> deg = one_tree(start); //erhalte knotengrade bei aktuellem pi = 0
         std::vector<int> deg_prev(ncount);
         for (int k = 0; k < ncount; ++k) deg_prev[k] = deg[k];
-        std::vector<int> best_delta(ncount);
+        std::vector<int> best_pi(ncount);
 
-        int min_w = w_delta(deg);
-        int len = deg[ncount];
+        int min_w = w_pi(deg);
+        const int len = deg[ncount];
         int step1 = len / (2 * ncount);
         int M = static_cast<int>(ncount * ncount / 50. + 0.5) + ncount + 15;
 
         for (int m = 0; m < M; ++m) {
             //std::cout << step(m, M, step1) << std::endl;
-            int cur_w = w_delta(deg);
+            int cur_w = w_pi(deg);
             if(cur_w < min_w) {
                 min_w = cur_w;
                 step1 = deg[ncount] / (2 * ncount);
-                //for (int k = 0; k < ncount; ++k) best_delta[k] = delta[k];
             }
             for (int k = 0; k < ncount; ++k) {
-                delta[k] += static_cast<int>(step(m, M, step1) * (deg[k] - 2));
-                //Volgenant and Jonkler
+                //passt pi an: ist der knotengrad höher als 2, so ist der knoten zu "beliebt" und die distanz wird erhöht
+                //bei knotengrad kleiner als 2 wird die distanz verringert
+                //bei knotengrad 2 passiert nichts
+                //so "konvergieren" die knotengrade gegen 2
+                pi[k] += static_cast<int>(step(m, M, step1) * (deg[k] - 2));
+                //Volgenant and Jonkler bieten eine andere Funktion, war bei mir jedoch schlchter
                 /*if(deg[k] == 2) continue;
-                delta[k] += (0.6 * step(m, M, step1) * (deg[k] - 2)
+                pi[k] += (0.6 * step(m, M, step1) * (deg[k] - 2)
                 + 0.4 * step(m, M, step1) * (deg_prev[k] - 2));*/
             }
             for (int k = 0; k < ncount; ++k) deg_prev[k] = deg[k]; //update prev
-            deg = one_tree(start);
+            deg = one_tree(start); //aktualisiert die knotengrade nach verändertem pi
         }
 
         for (int k = 0; k < ncount; ++k) {
-            delta_sum[k] += delta[k];
-            //delta_sum[k] += best_delta[k];
+            pi_sum[k] += pi[k];
         }
-        //std::cout << hk_bound() << std::endl;
+
+        //die hk bound maximiert w(pi) über alle alle pi, da hier viele pis berechnet werden
+        //verwende ich diese um die hk bound zu approximieren
         std::vector<int> hk_one_tree = hk_bound();
         if(hk_one_tree[ncount] > best_hk_bound) {
             best_hk_bound = hk_one_tree[ncount];
-            best_hk_one_tree = hk_one_tree;
         }
 
     }
     for (int k = 0; k < ncount; ++k) {
-        delta[k] = delta_sum[k] / ncount;
+        pi[k] = pi_sum[k] / ncount; //mittelt über alle pis
     }
     std::cout << "HK bound (lower bound): " << std::max(best_hk_bound, hk_bound()[ncount]) << std::endl;
 }
 
-//w(pi) im buch, delta ist die anzahl inzidenter kanten im mst
-int TSP_enumeration::w_delta(const std::vector<int>& deg) const {
+//w(pi) im buch, pi ist die anzahl inzidenter kanten im mst
+int TSP_enumeration::w_pi(const std::vector<int>& deg) const {
     int sum = deg[ncount];
     for (int k = 0; k < ncount; ++k) {
-        sum += delta[k] * (deg[k] - 2);
+        sum += pi[k] * (deg[k] - 2);
     }
     return sum;
 }
 
 //w(pi) allerdings auf dem originales graph
-int TSP_enumeration::w_delta_unmodified(const std::vector<int>& deg) const {
+int TSP_enumeration::w_pi_unmodified(const std::vector<int>& deg) const {
     int sum = deg[ncount + 1];
     for (int k = 0; k < ncount; ++k) {
-        sum += delta[k] * (deg[k] - 2);
+        sum += pi[k] * (deg[k] - 2);
     }
     return sum;
 }
 
 //step function nach valenzuela und jones
 double TSP_enumeration::step(const int m, const int M, const double step1) {
-    double step = (1.0 * (m - 1) * (2 * M - 5) / (2 * (M - 1))) * step1
-    - (m - 2) * step1
-    + (0.5 * (m - 1) * (m - 2) / ((M - 1) * (M - 2))) * step1;
+    const double step = (1.0 * (m - 1) * (2 * M - 5) / (2 * (M - 1))) * step1
+                        - (m - 2) * step1
+                        + (0.5 * (m - 1) * (m - 2) / ((M - 1) * (M - 2))) * step1;
     return step;
 }
 
@@ -323,7 +326,7 @@ double TSP_enumeration::step(const int m, const int M, const double step1) {
  * gibt außerdem die anzahl der inzidenten kanten im 1 tree für jeden knoten
  */
 std::vector<int> TSP_enumeration::one_tree(const int start) {
-    int start_city = tour[start];
+    const int start_city = tour[start];
 
     tour_swap(ncount - 1, start);
     std::vector<int> incidentCityCount = held_karp_mst(ncount - 1);
@@ -339,7 +342,7 @@ std::vector<int> TSP_enumeration::one_tree(const int start) {
         if(tour[i] == start_city) {
             continue;
         }
-        int curdist = dist(tour[i],start_city);
+        const int curdist = dist(tour[i],start_city);
 
         if(curdist < mindist_1) {
             mindist_2 = mindist_1;
@@ -355,18 +358,18 @@ std::vector<int> TSP_enumeration::one_tree(const int start) {
             mini_2 = i;
         }
     }
-    incidentCityCount[tour[mini_1]]++; //passt die werte an da von dem startknoten noch die 2 kleinsten kanten eingefügt werden
+    incidentCityCount[tour[mini_1]]++; //passt die knotengrade an da von dem startknoten noch die 2 kleinsten kanten eingefügt werden
     incidentCityCount[tour[mini_2]]++;
     incidentCityCount[start_city] = 2;
 
-    incidentCityCount[ncount] += mindist_1 + mindist_2;
+    incidentCityCount[ncount] += mindist_1 + mindist_2; //aktualisiert die länge da die beiden kanten hinzugefügt werden
     incidentCityCount[ncount + 1] += unmodified_mindist_1 + unmodified_mindist_2;
 
     return incidentCityCount;
 }
 
 /* gibt die länge des mst der ersten count knoten zurück
- * gibt außerdem die anzahl der inzidenten kanten im mst für jeden knoten zurück, für die berechnung von w_delta
+ * gibt außerdem die anzahl der inzidenten kanten im mst für jeden knoten zurück, für die berechnung von w_pi
  */
 std::vector<int> TSP_enumeration::held_karp_mst(int count) const
 /* Adopted from Bentley, Unix Review 1996 */
@@ -395,17 +398,8 @@ std::vector<int> TSP_enumeration::held_karp_mst(int count) const
                 mini = i;
             }
         }
-        incidentCityCount[pcity[mini]]++; //aktualisiert delta der beiden knoten
+        incidentCityCount[pcity[mini]]++; //aktualisiert pi der beiden knoten
         incidentCityCount[nearestCity[mini]]++;
-
-        /*std::cout << "--------------------" << std::endl;
-        int dist_a = dist(pcity[mini], nearestCity[mini]);
-        int dist_b = dist(nearestCity[mini], pcity[mini]);
-        if(dist_a != mindist) {
-            std::cout << "mist " << dist_a << " " << dist_b << std::endl;
-        }
-        std::cout << "dist hat: " << dist(pcity[mini], nearestCity[mini]) << " dist soll: " << mindist << std::endl;
-        std::cout << "kante: " << pcity[mini] << " " << nearestCity[mini] << std::endl;*/
 
         newcity = pcity[mini];
         len += mindist;
@@ -438,14 +432,13 @@ void TSP_enumeration::twoOptInit() {
     std::cout << "2opt len (upper bound): " << bestlen << std::endl;
 }
 
-int TSP_enumeration::two_opt(int cur_len) {
+int TSP_enumeration::two_opt(const int cur_len) {
     int len = cur_len;
     bool improved = true;
     while (improved) {
         improved = false;
-        //for (int i = 0; i < ncount; i++) printf ("%d ", tour[i]);
-        //printf ("\n");
 
+        //sucht nach knoten, deren kanten zu tauschen die länge verkürzt
         for (int i = 0; i < ncount; i++) {
             for (int j = i + 2; j < ncount; ++j) {
                 if(i == 0 && j == ncount - 1) {
@@ -465,18 +458,11 @@ int TSP_enumeration::two_opt(int cur_len) {
                 if (newDist < curDist) {
                     improved = true;
                     len = len - curDist + newDist;
-                    //tour_swap(i, j);
-                    //std::cout << tour[i] << " " << tour[j] << std::endl;
 
                     for (int k = 0; k < (j - i) / 2; ++k) {
                         tour_swap(i + k + 1, j - k); //dreht die reihenfolge der knoten bei swap der kanten, ein bild malen hilft
                     }
-                    int actual_len = tour_length();
-                    if(len != actual_len) {
-                        std::cout << "help" << std::endl;
-                    }
-
-                    i = ncount;
+                    i = ncount; //um beide for schleifen zu beenden, hässlich ik
                     break;
                 }
             }
@@ -486,6 +472,7 @@ int TSP_enumeration::two_opt(int cur_len) {
 }
 
 //gibt die länge der nearest neighbour tour ausgehend von start zurück
+//übernommen aus dem kapitel
 int TSP_enumeration::nntour(int start)
 {
     int i, j, best, bestj, len = 0;
@@ -515,13 +502,14 @@ bool TSP_enumeration::is_sym() const {
 }
 
 int TSP_enumeration::dist(int i, int j) const {
-    return distmatrix[i][j] + delta[i] + delta[j];
+    return distmatrix[i][j] + pi[i] + pi[j];
 }
 
 int TSP_enumeration::unmodified_dist(int i, int j) const {
     return distmatrix[i][j];
 }
 
+//übernommen aus dem kapitel
 int TSP_enumeration::tour_length() const {
     int len = 0;
     for (int i = 1; i < ncount; i++) {
@@ -546,6 +534,7 @@ int TSP_enumeration::best_tour_length() const {
     return len + unmodified_dist(besttour[ncount-1],besttour[0]);
 }
 
+//übernommen aus dem kapitel
 void TSP_enumeration::tour_swap(const int i, const int j)
 {
     const int temp = tour[i];
@@ -553,62 +542,7 @@ void TSP_enumeration::tour_swap(const int i, const int j)
     tour[j] = temp;
 }
 
-void TSP_enumeration::print_path_map() const {
-    for (const auto& i: shortest_path_map) {
-        for (int j = ncount; j < 2 * ncount; ++j) {
-            if (i.first[j]) {
-                std::cout << j - ncount << " ";
-            }
-        }
-
-        for (int j = 0; j < ncount; ++j) {
-            if (i.first[j]) {
-                std::cout << j << " ";
-            }
-        }
-
-        for (int j = 2 * ncount; j < 3 * ncount; ++j) {
-            if (i.first[j]) {
-                std::cout << j - 2 * ncount << " ";
-            }
-        }
-        std::cout << ": " << i.second << std::endl;
-    }
-}
-
 //verworfene methoden
-
-//precomputed einige pfade, irgendetwas stimmt allerding nicht oder es gibt überhaupt keinen speedup
-void TSP_enumeration::path_precompute(int s, int t, int pathlen) {
-    if(s <= ncount - 4) { //berechnet den key für die hash map und setzt den wert auf den kleinsten gefundenen
-        std::vector<bool> key(2 * ncount);
-        for (int i = s; i < ncount; i++) {
-            key[tour[i]] = true;
-        }
-        key[tour[s] + ncount] = true;
-
-        auto findit = shortest_path_map.find(key);
-        if (findit != shortest_path_map.end()) {
-            shortest_path_map[key] = std::min(findit -> second, pathlen);
-        } else {
-            shortest_path_map[key] = pathlen;
-        }
-    }
-
-    //std::cout << std::string((ncount - 1 - k) * 3, ' ') << pathlen << std::endl;
-    if (s == t + 1) {
-        //std::cout << "path length = " << pathlen << std::endl;
-        //std::cout << "+ " << k << "-" << k - 1 << std::endl;
-        //return std::min(pathlen + dist(tour[s-1],tour[s]), best_pathlen);
-        return;
-    }
-    for (int i = t + 1; i < s; i++) {
-        tour_swap(i,s-1);
-        //std::cout << "+ " << k << "-" << k - 1 << std::endl;
-        path_precompute(s - 1, t, pathlen + dist(tour[s-1],tour[s]));
-        tour_swap(i,s-1);
-    }
-}
 
 /*eine methode die für jeden knoten die kanten der nächsten k städte behält, und für die restlichen
 städte entfernt (das gewicht der kante wird auf maxcost gesetzt)
@@ -637,4 +571,28 @@ void TSP_enumeration::k_neigbour_init(int k) {
         }
     }
     distmatrix = new_distmatrix;
+}
+
+//debug methode
+void TSP_enumeration::print_path_map() const {
+    for (const auto& i: shortest_path_map) {
+        for (int j = ncount; j < 2 * ncount; ++j) {
+            if (i.first[j]) {
+                std::cout << j - ncount << " ";
+            }
+        }
+
+        for (int j = 0; j < ncount; ++j) {
+            if (i.first[j]) {
+                std::cout << j << " ";
+            }
+        }
+
+        for (int j = 2 * ncount; j < 3 * ncount; ++j) {
+            if (i.first[j]) {
+                std::cout << j - 2 * ncount << " ";
+            }
+        }
+        std::cout << ": " << i.second << std::endl;
+    }
 }

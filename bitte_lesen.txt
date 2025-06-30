@@ -1,0 +1,24 @@
+Das Programm erwartet immer Parameter, die beiden ersten Optionen sind:
+    -path <path> //pfad zu einer .tsp datei in Anführungszeichen
+    -rand <int> <seed> //erzeugt einen Graphen mit n Knoten durch Generieren von 2d Koordinaten mit euklidischer Distanz
+                        seed ist optional und standartmäßig 1, da ich mit diesem bereits eine 190 Knoten Instanz lösen konnte
+Danach kann man mit -out <path> einen Zielort für die Tour-Datei angeben. Zu beachten ist, dass immer
+"_einf.tour.opt" bzw "_haupt.tour.opt" appendet wird.
+Ohne -out wird der Name in der tour Datei übernommen oder "unnamed", falls kein name gefunden wurde.
+
+Bsp: -rand 42 -out hallo
+
+Es werden immer die Einstiegs- als auch die Hauptaufgabe auf den Graphen angewendet
+
+Um zu Debuggen empfehle ich erst set(CMAKE_CXX_FLAGS -O3) auszukommentieren.
+Diese Compile-Optimierung macht den Code zwar ~5 mal schneller, aber nicht mehr "linear" beim Debuggen.
+
+Ergebnisse:
+    Ich bin ziemlich zufrieden mit dem fertigen Algo, besonders beeindruckt bin ich von der Held-Karp Optimierung
+    und ihrer Effektivität, ich konnte mit ihr bereits eine Instanz mit 190 Knoten lösen, ohne stellen schon 50 Knoten ein Problem dar.
+    (Insbesondere bin ich etwas schneller als das Vorbild im Kapitel :) )
+    Das Precomputen von Wegen allerdings hat die Zeit nur schlechter gemacht, daher habe ich dies wieder rausgenommen.
+    Ich frage mich wieviel schneller der Algo mit einer anderen Implementierung von MSTs sein könnte,
+    da das Berechnen dieser einen großen Anteil darstellt. Auch habe ich gesagt bekommen,
+    dass das Verwenden von Bitsets anstatt Vektoren als Eingabe der Hashfunktionen den Code wesentlich schneller machen soll.
+    Ich weiß allerdings nicht was ich davon halten soll, da die Größe der Bitsets hardcoded ist.

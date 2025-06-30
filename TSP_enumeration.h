@@ -27,7 +27,7 @@ private:
     std::unordered_map<std::vector<bool>, int> shortest_path_map;
     int map_uses = 0;
     int shortest_path_map_uses = 0;
-    std::vector<int> delta;
+    std::vector<int> pi;
     bool tourFound = false;
     std::vector<int> k_neighbour_max_dist;
     std::map<std::string, std::vector<int>> display_data;
@@ -56,19 +56,17 @@ private:
 
     bool dynamic_shortest_path(int s, int t, int tourlen);
 
-    void path_precompute(int s, int t, int pathlen);
-
     std::vector<int> hk_bound();
 
     int one_tree_bound();
 
     void held_karp_tuning();
 
-    int w_delta(const std::vector<int>& one_tree) const;
+    int w_pi(const std::vector<int>& one_tree) const;
 
-    int w_delta_unmodified(const std::vector<int> &deg) const;
+    int w_pi_unmodified(const std::vector<int> &deg) const;
 
-    double step(int m, int M, double step1);
+    static double step(int m, int M, double step1);
 
     std::vector<int> one_tree(int start);
 

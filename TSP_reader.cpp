@@ -44,8 +44,6 @@ TSP_reader::TSP_reader(const std::string& filename) {
 
         std::vector<int> edgeWeights = getEdgeWeights(file, line); //liest erstmal alle kantengewichte ein
 
-        //ehrlich gesagt sind nicht alle typen getestet, aber bisher hatte ich keine crashes
-
         //die verschiedenen interpretationen der kanten
         if(edgeWeightFormat == "FULL_MATRIX") {
             for (int x = 0; x < numNodes; x++) {
@@ -81,6 +79,10 @@ TSP_reader::TSP_reader(const std::string& filename) {
                 }
             }
         }
+        node_ids = std::vector<int>(numNodes);
+        for (int i = 0; i < numNodes; i++) {
+            node_ids[i] = i;
+        }
     } else {
         await(file, line, "NODE_COORD_SECTION");
 
@@ -103,20 +105,20 @@ TSP_reader::TSP_reader(const std::string& filename) {
 std::vector<std::vector<double>> TSP_reader::getCoords_with_ids(std::ifstream &file, std::string &line) {
     std::vector<std::vector<double>> coords;
     while (getline(file, line)) {
+        line = line.substr(line.find_first_not_of(' '), line.size()); //entfernt leerzeichen am anfang
         if(line == "EOF") {
             return coords;
         }
         std::vector<double> coord(3);
-        line = line.substr(line.find_first_not_of(' '), line.size()); //entfernt leerzeichen am anfang
-        coord[0] = std::stoi(line.substr(0, line.find_first_of(' ')));
+        coord[0] = std::stod(line.substr(0, line.find_first_of(' ')));
 
         line = line.substr(line.find_first_of(' '), line.size()); //entfernt das 1. argument
         line = line.substr(line.find_first_not_of(' '), line.size()); //entfernt leerzeichen
-        coord[1] = std::stoi(line.substr(0, line.find_first_of(' ')));
+        coord[1] = std::stod(line.substr(0, line.find_first_of(' ')));
 
         line = line.substr(line.find_first_of(' '), line.size()); //entfernt das 2. argument
         line = line.substr(line.find_first_not_of(' '), line.size()); //entfernt leerzeichen
-        coord[2] = std::stoi(line.substr(0, line.find_first_of(' ')));
+        coord[2] = std::stod(line.substr(0, line.find_first_of(' ')));
 
         coords.push_back(coord);
     }
@@ -126,16 +128,27 @@ std::vector<std::vector<double>> TSP_reader::getCoords_with_ids(std::ifstream &f
 std::vector<int> TSP_reader::getEdgeWeights(std::ifstream &file, std::string &line) {
     std::vector<int> edgeWeights;
     while (getline(file, line, ' ')) {
-        std::string::iterator end_pos = std::remove(line.begin(), line.end(), '\n');
-        line.erase(end_pos, line.end());
-
-        if(line == "") {
+        if(line.empty()) {
             continue;
         }
-        if(!is_number(line)) {
+
+        //line kann von der form int_a + \n + int_b sein
+        std::string a = line;
+        std::string b;
+        if(line.find('\n') != std::string::npos) {
+            a = line.substr(0, line.find_first_of('\n'));
+            b = line.substr(line.find_first_of('\n') + 1, line.size());
+        }
+
+        if(!is_number(a)) {
             return edgeWeights;
         }
-        edgeWeights.push_back(std::stoi(line));
+        edgeWeights.push_back(std::stoi(a));
+        if(is_number(b)) {
+            edgeWeights.push_back(std::stoi(b));
+        } else if(!b.empty() && b != "\n") {
+            return edgeWeights;
+        }
     }
     return edgeWeights;
 }

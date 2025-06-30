@@ -15,7 +15,7 @@ public:
     Graph(std::vector<std::vector<double>> coords, const std::string& norm, const std::vector<int>& node_ids);
     explicit Graph(int numNodes);
 
-    void random2d(const std::string& norm, int max);
+    void random2d(const std::string &norm, int max, int seed);
 
     std::vector<std::vector<int>> getDistmatrix();
     [[nodiscard]] int getNumNodes() const;

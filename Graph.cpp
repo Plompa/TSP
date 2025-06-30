@@ -7,6 +7,7 @@
 #include <array>
 #include <string>
 #include <cmath>
+#include <iostream>
 #include <random>
 #include <utility>
 
@@ -37,15 +38,12 @@ Graph::Graph(std::vector<std::vector<double>> coords, const std::string& norm, c
     calcDistmatrix(coords, norm);
 }
 
-void Graph::random2d(const std::string& norm, int max) {
-    //std::random_device rd; // obtain a random number from hardware
-    //std::mt19937 gen(rd()); // seed the generator
-    std::mt19937 gen(1); // seed the generator //1
-    std::uniform_int_distribution<> distr(0, max); // define the range
-
+void Graph::random2d(const std::string& norm, const int max, const int seed) {
+    std::mt19937 gen(seed); //1
+    std::uniform_int_distribution<> distr(0, max);
     std::vector<std::vector<double>> coords;
 
-    for(int i = 0; i < Graph::numNodes; i++) {
+    for(int i = 0; i < numNodes; i++) {
         std::vector<double> coord(2);
         coord[0] = distr(gen);
         coord[1] = distr(gen);
@@ -71,7 +69,7 @@ void Graph::calcDistmatrix(const std::vector<std::vector<double>>& coords, const
                 distmatrix[x][y] = dist;
             }
         }
-    } else { //ceil
+    } else if(norm == "CEIL_2D"){ //ceil
         for (int x = 0; x < numNodes; x++) {
             for (int y = 0; y < numNodes; y++) {
                 double dx = coords[x][0] - coords[y][0];
@@ -80,6 +78,8 @@ void Graph::calcDistmatrix(const std::vector<std::vector<double>>& coords, const
                 distmatrix[x][y] = dist;
             }
         }
+    } else {
+        throw std::invalid_argument("nicht supportete norm: " + norm);
     }
 }
 
