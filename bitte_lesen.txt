@@ -6,7 +6,7 @@ Danach kann man mit -out <path> einen Zielort für die Tour-Datei angeben. Zu be
 "_einf.tour.opt" bzw "_haupt.tour.opt" appendet wird.
 Ohne -out wird der Name in der tour Datei übernommen oder "unnamed", falls kein name gefunden wurde.
 
-Bsp: -rand 42 -out hallo
+Bsp: -rand 42 3 -out hallo
 
 Es werden immer die Einstiegs- als auch die Hauptaufgabe auf den Graphen angewendet
 

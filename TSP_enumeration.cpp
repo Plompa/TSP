@@ -131,7 +131,7 @@ int TSP_enumeration::mst(int count) /* Adopted from Bentley, Unix Review 1996 */
         return findit -> second;
     }
 
-    int i, m, mini, newcity, mindist, thisdist, len = 0;
+    int i = 0, m = 0, mini = 0, newcity = 0, mindist = 0, thisdist = 0, len = 0;
     int pcity[ncount], pdist[ncount];
     if (count <= 1) return 0;
     for (i = 0; i < count; i++) {
@@ -374,7 +374,7 @@ std::vector<int> TSP_enumeration::one_tree(const int start) {
 std::vector<int> TSP_enumeration::held_karp_mst(int count) const
 /* Adopted from Bentley, Unix Review 1996 */
 {
-    int i, m, mini, newcity, mindist, thisdist, len = 0, orig_len = 0;
+    int i = 0, m = 0, mini = 0, newcity = 0, mindist = 0, thisdist = 0, len = 0, orig_len = 0;
     int pcity[ncount], pdist[ncount];
     int nearestCity[ncount];
     std::vector<int> incidentCityCount(ncount);
